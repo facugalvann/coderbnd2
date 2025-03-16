@@ -3,15 +3,37 @@ import cookieParser from "cookie-parser"
 import session from "express-session"
 import MongoStore from "connect-mongo"
 import mongoose from "mongoose"
-import usersRouter from './routes/users.routes.js'
-import sessionsRouter from "./routes/sessions.routes.js"
-import cartsRouter from "./routes/carts.routes.js"
+import path from 'path'
 import passport from 'passport'
+import { create } from 'express-handlebars'
 import initializatedPassword from './config/passport.js'
+import indexRouter from "./routes/index.routes.js"
+import __dirname from './path.js'
+import config from "../config.js"
+import dotenv from 'dotenv';
+import { Command } from "commander"
+
+const app = express();
+const hbs = create();
+const program = new Command();
 
 
-const app = express()
-const PORT = 8080
+program
+    .option("-d", "Variable de debug", false)
+    .option('-p <port>', "Puerto de mi aplicación", 8080)
+    .option('--mode <mode>', "Entorno de ejecución de la aplicación", "development")
+    .requiredOption('-u <users>', "Usuario de mi app", "No se ingresó ningún usuario");
+program.parse();
+
+const opts = program.opts();
+
+
+dotenv.config({
+    path: opts?.mode === "development" ? './.env.development' : './.env.production'
+});
+
+const { URL_MONGO, USER, PASS_MONGO, SECRET_SESSION, SECRET_COOKIE } = process.env;
+const PORT = opts.p || 8080; 
 
 
 
@@ -28,19 +50,20 @@ app.use(session({
 }))
 
 mongoose.connect('mongodb+srv://galvanfacundo004:Facugoten05@codercluster.dx1rh.mongodb.net/c82641?retryWrites=true&w=majority&appName=CoderCluster')
-.then(() => console.log("DB is connected"))
-.catch((e) => console.log("Server on port:", PORT))
+    .then(() => console.log("DB is connected"))
+    .catch((e) => console.log("Server on port:", PORT))
 
 
 initializatedPassword()
 app.use(passport.initialize())
 app.use(passport.session())
+app.engine('handlebars', hbs.engine)
+app.set('view engine', 'handlebars')
+app.set('views', path.join(__dirname, "views"))
+app.use(express.static(path.join(__dirname, "public")))
 
+app.use('/', indexRouter)
 
-app.use('/api/users', usersRouter)
-app.use('/api/sessions', sessionsRouter)
-app.use('/api/carts', cartsRouter)
-
-app.listen(PORT,() => {
+app.listen(PORT, () => {
     console.log("Server on port:", PORT)
 })

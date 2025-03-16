@@ -1,0 +1,22 @@
+<div class="container d-flex justify-content-center align-items-center vh-120">
+    <div class="card p-4 shadow-sm cardSession">
+        <h2 class="text-center">Iniciar Sesion</h2>
+        <form action="/api/sessions/login" id="loginForm" method="post">
+        <div class="mb3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" name="email">
+        </div>
+        <div class="mb3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" name="password">
+        </div>
+        <button type="submit" class="btn btn-primay w-100">
+            Iniciar sesion 
+        </button>
+        </form>
+        <div class="text-center mt-3">
+            <a href="/api/sessions/github">Inicir sesion con Github</a>
+            <a href="/api/sessions/viewregister">¿No posee una cuenta? Registrarse</a>
+        </div>
+    </div>
+</div>

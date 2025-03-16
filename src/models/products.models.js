@@ -37,7 +37,7 @@ const productSchema = new Schema({
     }
 })
 
-productsSchema.plugin(paginate)
+
 
 const productModel = model("products", productSchema)
 

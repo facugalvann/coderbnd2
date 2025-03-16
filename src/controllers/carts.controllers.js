@@ -60,7 +60,7 @@ export const deleteProductCart = async(req,res) => {
             const indice = cart.products.findIndex(prod => prod.id == productId)
 
             if (indice != -1) {
-                cart.product.splice(indice, 1)
+                cart.products.splice(indice, 1)
                 cart.save()
                 return res.status(200).send("Producto eliminado correctamente")
             }else{

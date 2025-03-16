@@ -1,5 +1,6 @@
 import { Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
+import cartModel from "./carts.models.js";
 
 const userSchema = new Schema({
     first_name: {
@@ -13,7 +14,7 @@ const userSchema = new Schema({
     email: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
     },
     age: {
         type: Number,
@@ -33,17 +34,26 @@ const userSchema = new Schema({
     }
 });
 
+userSchema.post("save", async function(userCreated) {
+    try {
+        const newCart = await cartModel.create({ products: [] });
+        await userModel.findByIdAndUpdate(userCreated._id, {
+            cart: newCart._id
+        });
+    } catch (e) {
+        console.log("Error creando carrito para user:", e);
+    }
+});
 
-userSchema.pre('save', function (next) {
+userSchema.pre('save', async function(next) {
     if (this.isModified("password")) {
-        this.password = bcrypt.hashSync(this.password, 5); 
+        this.password = await bcrypt.hash(this.password, 10);
     }
     next();
 });
 
-
-userSchema.methods.comparePassword = function (candidatePassword) {
-    return bcrypt.compareSync(candidatePassword, this.password);
+userSchema.methods.comparePassword = async function(candidatePassword) {
+    return await bcrypt.compare(candidatePassword, this.password);
 };
 
 const userModel = model("users", userSchema);

@@ -1,48 +1,101 @@
-import jwt from 'jsonwebtoken';
+import jwt from 'passport-jwt'
 import passport from 'passport'
 import local from 'passport-local'
+import GithubStrategy from 'passport-github2'
 import { validatePassword, hashPassword } from '../utils/bcrypt.js'
 import userModel from '../models/users.models.js'
 
 const localStrategy = local.Strategy
+const JWTStrategy = jwt.Strategy
+const ExtractJWT = jwt.ExtractJwt
+
+const cookieExtractor = (req) => {
+    let token = null
+    if (req.cookies) {
+        token = req.cookies['coderSession']
+    }
+    return token
+}
 
 const initializatedPassword = () => {
+
     passport.use('register', new localStrategy({
-        passReqToCallBack: true,
-        usernameField:'email'
+        passReqToCallback: true,
+        usernameField: 'email'
     }, async (req, username, password, done) => {
         try {
-            const {first_name, last_name, email, password, age} = req.body
-            const newUser = await userModel.create({ 
-                first_name: first_name, 
-                last_name: last_name, 
-                email: email, 
-                password: hashPassword(password), 
-                age: age 
-            })
-            return done(null, newUser)
-            res.status(201).send(`Usuario registrado correctamente`)
-        } catch (e) {
-            return done(e)
-        }
-    }))
-    
-    passport.use('login', new localStrategy({usernameField: 'email'}, async (username, password, done) => {
-        try {
-    
-            const user = await userModel.findOne({ email:username })
-    
-            if (validatePassword(password, user?.password)) {
-                return done(null, user)
-            } else {
-                return (null, false)
+            const { first_name, last_name, email, password, age } = req.body
+
+            const existingUser = await userModel.findOne({ email })
+            if (existingUser) {
+                return done(null, false, { message: 'Usuario ya existe' })
             }
-    
+
+            const newUser = await userModel.create({
+                first_name,
+                last_name,
+                email,
+                password: hashPassword(password),
+                age
+            })
+
+            return done(null, newUser)
         } catch (e) {
             return done(e)
         }
     }))
 
+
+    passport.use('login', new localStrategy({ usernameField: 'email' }, async (username, password, done) => {
+        try {
+            const user = await userModel.findOne({ email: username })
+
+            if (!user || !validatePassword(password, user.password)) {
+                return done(null, false, { message: 'Credenciales incorrectas' })
+            }
+
+            return done(null, user)
+        } catch (e) {
+            return done(e)
+        }
+    }))
+
+
+    passport.use('github', new GithubStrategy({
+        clientID: "Ov23lieEc9tYchaaTmkT",
+        clientSecret: "004c4f9c5bfed4a480ee0da6f07c2933d049e568",
+        callbackURL: "http://localhost:8080/api/sessions/githubcallback"
+    }, async (accesToken, refreshToken, profile, done) => {
+        try {
+            let user = await userModel.findOne({ email: profile._json.email })
+            if (!user) {
+                user = await userModel.create({
+                    first_name: profile._json.name,
+                    last_name: "",
+                    email: profile._json.email,
+                    password: hashPassword("coder"),
+                    age: 18
+                })
+            }
+            done(null, user)
+        } catch (e) {
+            done(e)
+        }
+    }))
+
+
+    passport.use('jwt', new JWTStrategy({
+        jwtFromRequest: ExtractJWT.fromExtractors([cookieExtractor]),
+        secretOrKey: "galvanfacundo004"
+    }, async (jwt_payload, done) => {
+
+        try {
+            return done(null, jwt_payload)
+        } catch (e) {
+            return done(e)
+        }
+
+    }))
 
     passport.serializeUser((user, done) => {
         done(null, user._id)
@@ -52,7 +105,6 @@ const initializatedPassword = () => {
         const user = await userModel.findById(id)
         done(null, user)
     })
-
 }
 
 passport.use("current", async (req, done) => {
@@ -63,7 +115,7 @@ passport.use("current", async (req, done) => {
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET); 
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await userModel.findById(decoded.id);
 
         if (!user) {
@@ -76,6 +128,4 @@ passport.use("current", async (req, done) => {
     }
 });
 
-
-
-export default initializatedPassword
+export default initializatedPassword;
