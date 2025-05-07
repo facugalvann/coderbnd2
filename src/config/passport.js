@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import jwt from 'passport-jwt'
 import passport from 'passport'
 import local from 'passport-local'
@@ -86,7 +87,7 @@ const initializatedPassword = () => {
 
     passport.use('jwt', new JWTStrategy({
         jwtFromRequest: ExtractJWT.fromExtractors([cookieExtractor]),
-        secretOrKey: "galvanfacundo004"
+        secretOrKey: process.env.JWT_SECRET
     }, async (jwt_payload, done) => {
 
         try {

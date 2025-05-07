@@ -6,7 +6,7 @@ import userModel from "../models/users.models.js";
 export const login = async (req, res) => {
     try {
         if (!req.user) {
-            return res.status(400).json({message: "Usuario o contraseña no válidos"});
+            return res.status(400).json({ message: "Usuario o contraseña no válidos" });
         }
 
 
@@ -20,9 +20,9 @@ export const login = async (req, res) => {
             httpOnly: true,
             Secure: false,
             maxAge: 86400000
-        }).json({message: "Usuario logueado correctamente"});
+        }).json({ message: "Usuario logueado correctamente" });
     } catch (e) {
-        res.status(500).json({message: e});
+        res.status(500).json({ message: e });
     }
 };
 
@@ -30,11 +30,11 @@ export const login = async (req, res) => {
 export const register = async (req, res) => {
     try {
         if (!req.user)
-            return res.status(400).json({message: "Email y contrase;a son obligatorios"})
+            return res.status(400).json({ message: "Email y contrase;a son obligatorios" })
 
-        return res.status(201).json({message: "Usuario registrado correctamente"})
+        return res.status(201).json({ message: "Usuario registrado correctamente" })
     } catch (e) {
-        res.status(500).json({message: e})
+        res.status(500).json({ message: e })
     }
 }
 
@@ -54,21 +54,20 @@ const Githublogin = async (req, res) => {
                 secure: process.env.NODE_ENV === 'production',  // Usar 'true' solo en producción
                 maxAge: 86400000
             })
-            .send("Usuario autenticado con GitHub correctamente");
+            .json({ message: "Usuario logueado correctamente" })
     } catch (e) {
         res.status(500).send(e);
     }
 };
 
-const viewRegister = async (req, res) => {
-    res.status(200).render('templates/register', {
-        title: "Registro de Usuarios",
-        url_js: "/js/register.js",
-        url_css: "/css/main.css"
-    })
-}
-
-const viewLogin = async (req,res) => {
+ const viewRegister = async (req, res) => {
+     res.status(200).render('templates/register', {
+         title: "Registro de Usuarios",
+         url_js: "/js/register.js",
+         url_css: "/css/main.css"
+     })
+ }
+const viewLogin = async (req, res) => {
     res.status(200).render('templates/login', {
         title: "Inicio de Sesion de Usuarios",
         url_js: "/js/login.js",
@@ -81,7 +80,7 @@ export default {
     login,
     register,
     Githublogin,
-    viewRegister,
-    viewLogin
+    viewLogin,
+    viewRegister
 };
 

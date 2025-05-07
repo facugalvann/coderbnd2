@@ -2,7 +2,7 @@ import { Router } from "express";
 import passport from "passport";
 import sessionController from "../controllers/sessions.controllers.js";
 import authorization from '../config/authorization.js'
-const  {login, register, Githublogin, viewRegister, viewLogin} = sessionController
+const  {login, register, Githublogin, viewLogin, viewRegister} = sessionController
 
 const sessionsRouter = Router();
 

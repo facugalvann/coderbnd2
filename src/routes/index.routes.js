@@ -6,6 +6,7 @@ import usersRouter from "./users.routes.js"
 
 const indexRouter = Router()
 
+
 indexRouter.use('/api/users', usersRouter)
 indexRouter.use('/api/sessions', sessionsRouter)
 indexRouter.use('/api/carts', cartsRouter)

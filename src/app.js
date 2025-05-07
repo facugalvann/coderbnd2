@@ -10,6 +10,7 @@ import initializatedPassword from './config/passport.js'
 import indexRouter from "./routes/index.routes.js"
 import __dirname from './path.js'
 import config from "../config.js"
+import'dotenv/config'
 import dotenv from 'dotenv';
 import { Command } from "commander"
 
@@ -38,18 +39,18 @@ const PORT = opts.p || 8080;
 
 
 app.use(express.json())
-app.use(cookieParser("firmaSecreta"))
+app.use(cookieParser(process.env.SECRET_COOKIE))
 app.use(session({
     store: MongoStore.create({
         mongoUrl: "mongodb+srv://galvanfacundo004:Facugoten05@codercluster.dx1rh.mongodb.net/?retryWrites=true&w=majority&appName=CoderCluster",
         ttl: 60
     }),
-    secret: "sesionSecreta",
+    secret: process.env.SECRET_SESSION,
     resave: true,
     saveUninitialized: true
 }))
 
-mongoose.connect('mongodb+srv://galvanfacundo004:Facugoten05@codercluster.dx1rh.mongodb.net/c82641?retryWrites=true&w=majority&appName=CoderCluster')
+mongoose.connect(process.env.MONGO_URL)
     .then(() => console.log("DB is connected"))
     .catch((e) => console.log("Server on port:", PORT))
 
